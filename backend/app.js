@@ -8,6 +8,7 @@ import cors from 'cors';
 
 import indexRouter from './routes/index.js';
 import usersRouter from './routes/users.js';
+import jobsRouter from './routes/jobs.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -25,6 +26,7 @@ app.use(cors());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/api/jobs', jobsRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

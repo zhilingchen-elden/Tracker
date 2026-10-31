@@ -1,35 +1,36 @@
-import { useState, useEffect } from 'react';
+import express from 'express';
 
-export default function App() {
-  const [jobs, setJobs] = useState([]);
-  const [company, setCompany] = useState('');
-  const [role, setRole] = useState('');
+const router = express.Router();
 
-  useEffect(() => {
-    fetch('http://localhost:3000/api/jobs')
-      .then(res => res.json())
-      .then(setJobs);
-  }, []);
+// Temporary job storage
+const jobs = [];
+let nextId = 1;
 
-  function addJob() {
-    fetch('http://localhost:3000/api/jobs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ company, role, postedBy: 'student' })
-    })
-      .then(res => res.json())
-      .then(newJob => setJobs([...jobs, newJob]));
-    setCompany(''); setRole('');
+// Get all posted jobs
+router.get('/', (req, res) => {
+  res.json(jobs);
+});
+
+// Post a new job
+router.post('/', (req, res) => {
+  const { company, role, postedBy } = req.body;
+
+  if (!company || !role) {
+    return res.status(400).json({
+      error: 'Company and role are required'
+    });
   }
 
-  return (
-    <div>
-      <input value={company} onChange={e => setCompany(e.target.value)} placeholder="Company" />
-      <input value={role} onChange={e => setRole(e.target.value)} placeholder="Role" />
-      <button onClick={addJob}>Add job</button>
-      <ul>
-        {jobs.map(j => <li key={j.id}>{j.company}: {j.role}</li>)}
-      </ul>
-    </div>
-  );
-}
+  const newJob = {
+    id: nextId++,
+    company,
+    role,
+    postedBy: postedBy || 'student'
+  };
+
+  jobs.push(newJob);
+
+  res.status(201).json(newJob);
+});
+
+export default router;
